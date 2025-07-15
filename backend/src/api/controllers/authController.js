@@ -2,6 +2,7 @@ import UserModel from "../models/userModel.js";
 import { comparePassword, generateToken, hashPassword} from "../../lib/utils.js"
 
 export const register = async (req, res) => {
+    console.log('register controller');
     try{
         const { email, password, username } = req.body;
 
@@ -11,12 +12,12 @@ export const register = async (req, res) => {
                 error: "User with this email or username already exists"
             })
         }
-
         const hashedPassword = await hashPassword(password);
-        const newUser = new UserModel.create({ email, username, password: hashedPassword});
+        const newUser = await UserModel.create({ email, username, password: hashedPassword});
 
         const token = generateToken(newUser._id);
-        res.statusss(201).json({
+        
+        res.status(201).json({
             user: newUser,
             token
         })
@@ -28,6 +29,7 @@ export const register = async (req, res) => {
 }
 
 export const login = async (req, res) => {
+    console.log('login controller');
     try{
         const {email, password} = req.body;
 
@@ -46,6 +48,7 @@ export const login = async (req, res) => {
         }
 
         const token = generateToken(user.id);
+        
         res.json({
             user, 
             token
