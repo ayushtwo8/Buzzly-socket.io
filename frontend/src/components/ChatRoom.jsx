@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import { io } from "socket.io-client";
+import { Send, Users, Wifi, WifiOff } from 'lucide-react'
+import MessageList from './MessageList'
+import UserList from './UserList'
+import TypingIndicator from './TypingIndicator'
+import { useAuth } from "../context/AuthContext";
 
 const ChatRoom = () => {
   const [socket, setSocket] = useState(null);
@@ -11,6 +16,7 @@ const ChatRoom = () => {
   const [showUserList, setShowUserList] = useState(false);
   const typingTimeoutRef = useRef(null);
   const messageInputRef = useRef(null);
+  const { user: currentUser} = useAuth();
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -66,9 +72,9 @@ const ChatRoom = () => {
     newSocket.on("user_typing", ({ user, isTyping }) => {
       setTypingUsers((prev) => {
         if (isTyping) {
-          return prev.find((u) => u.id === user.id) ? prev : [...prev, user];
+          return prev.find((u) => u.id === user._id) ? prev : [...prev, user];
         } else {
-          return prev.filter((u) => u.id !== user.id);
+          return prev.filter((u) => u.id !== user._id);
         }
       });
     });
@@ -106,7 +112,7 @@ const ChatRoom = () => {
       socket.emit("typing_stop");
     }
     if (typingTimeoutRef.current) {
-      clearInterval(typingTimeoutRef.current);
+      clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = null;
     }
   };
@@ -169,7 +175,9 @@ const ChatRoom = () => {
             </div>
           </div>
 
-          {/* message area */}
+          
+        </div>
+        {/* message area */}
           <div className="flex-1 overflow-hidden">
             <MessageList messages={messages} currentUser={currentUser} />
           </div>
@@ -199,7 +207,6 @@ const ChatRoom = () => {
               </button>
             </form>
           </div>
-        </div>
       </div>
     </div>
   );

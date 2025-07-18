@@ -1,6 +1,8 @@
 import UserModel from "../models/userModel.js";
 
 export const searchUsers = async (req, res) => {
+    console.log("searchUsers controller");
+    
     try{
         const { q } = req.query;
         const currentUserId = req.user._id;

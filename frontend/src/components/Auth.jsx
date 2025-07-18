@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import { MessageCircle, Users, Shield, Zap, Eye, EyeOff } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Auth = () => {
   const [view, setView] = useState("sign_in");
@@ -13,10 +14,17 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setloading] = useState(false);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const { login, register } = useAuth();
+  const { login, register, user } = useAuth();
 
   console.log("auth component");
+
+  useEffect(()=>{
+    if(user){
+      navigate('/chat');
+    }
+  }, [user]);
   
 
   const handleSubmit = async (e) => {

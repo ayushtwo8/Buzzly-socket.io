@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MessageCircle, Users, Zap } from "lucide-react";
 
 const JoinForm = ({ onJoin }) => {
   const [username, setUsername] = useState('');

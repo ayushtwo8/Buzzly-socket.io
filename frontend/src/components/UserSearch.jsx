@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { MessageCircle, Search, X } from "lucide-react";
+import axios from "axios";
 
 const UserSearch = ({
   onSelectUser,
   onClose,
-  currentUserId,
+  // currentUserId, // Removed as it was unused
   token,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -13,13 +14,21 @@ const UserSearch = ({
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
+  // Improvement #1: Debouncing the search input
   useEffect(() => {
-    if (searchTerm.trim()) {
-      searchUsers();
-    } else {
+    if (!searchTerm.trim()) {
       setUsers([]);
+      return;
     }
-  }, [searchTerm]);
+
+    // Set a timer to avoid API calls on every keystroke
+    const delayDebounceFn = setTimeout(() => {
+      searchUsers();
+    }, 500); // 500ms delay
+
+    // Cleanup function to cancel the timer
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, token]); // Also add token as a dependency if it can change
 
   const searchUsers = async () => {
     if (!token) return;
@@ -27,32 +36,31 @@ const UserSearch = ({
     setLoading(true);
     
     try {
-      const response = await fetch(
-        `${backendUrl}/api/v1/users/search?q=${encodeURIComponent(searchTerm)}&token=${token}`
+      const response = await axios.get(
+        `${backendUrl}/api/v1/user/search`, {
+          params: { q: searchTerm, token: token }
+        }
       );
-      
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data);
-      }
+      console.log("response: ", response.data);
+      setUsers(response.data);
     } catch (error) {
       console.error('Failed to search users:', error);
+      setUsers([]); // Clear results on error
+    } finally {
+      // Improvement #2: Use `finally` to guarantee setLoading(false) is called
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'online':
-        return 'bg-green-400';
-      case 'away':
-        return 'bg-yellow-400';
-      default:
-        return 'bg-gray-400';
+      case 'online': return 'bg-green-400';
+      case 'away': return 'bg-yellow-400';
+      default: return 'bg-gray-400';
     }
   };
 
+  // ... rest of your JSX remains the same, it is perfectly fine.
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col">
@@ -68,7 +76,6 @@ const UserSearch = ({
             </button>
           </div>
           
-          {/* Search Input */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
@@ -90,21 +97,19 @@ const UserSearch = ({
             </div>
           ) : users.length > 0 ? (
             <div className="space-y-2">
-              {users.map((user) => (
+              {users.filter(user=>user && user._id)
+              .map((user) => (
                 <div
-                  key={user.id}
-                  onClick={() => onSelectUser(user.id)}
+                  key={user._id}
+                  onClick={() => onSelectUser(user._id)}
                   className="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
                 >
-                  {/* Avatar */}
                   <div className="relative">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 flex items-center justify-center text-white font-medium">
                       {user.username.charAt(0).toUpperCase()}
                     </div>
                     <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${getStatusColor(user.status)}`} />
                   </div>
-
-                  {/* User Info */}
                   <div className="flex-1 min-w-0">
                     <h4 className="text-sm font-medium text-gray-900 truncate">
                       {user.username}
@@ -113,8 +118,6 @@ const UserSearch = ({
                       {user.status}
                     </p>
                   </div>
-
-                  {/* Action */}
                   <div className="flex-shrink-0">
                     <MessageCircle className="h-5 w-5 text-blue-600" />
                   </div>

@@ -12,11 +12,11 @@ const UserList = ({ users, currentUser }) => {
       
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {users.map((user) => {
-          const isCurrentUser = user.id === currentUser.id;
+          const isCurrentUser = user._id === currentUser._id;
           
           return (
             <div 
-              key={user.id} 
+              key={user._id} 
               className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${
                 isCurrentUser 
                   ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200' 

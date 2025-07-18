@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../context/AuthContext";
 import io from 'socket.io-client'
 import axios from "axios";
 import { LogOut, Plus } from "lucide-react";
@@ -55,12 +55,13 @@ const Dashboard = () => {
     if (!token) return;
     try {
       const response = await axios.get(
-        `${backendUrl}/api/v1/conversations?token=${token}`
+        `${backendUrl}/api/v1/conversations?token=${token}`,{
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
       );
-      if (response.ok) {
-        const data = await response.json();
-        setConversations(data);
-      }
+      setConversations(response.data);
     } catch (error) {
       console.log("Failed to fetch conversations: ", error);
     }
@@ -69,7 +70,7 @@ const Dashboard = () => {
   const handleNewConversation = (otherUserId) => {
     if (!socket || !user) return;
 
-    const conversationId = [user.id, otherUserId].sort().join("-");
+    const conversationId = [user._id, otherUserId].sort().join("-");
     socket.emit("start_conversation", { recipientId: otherUserId });
     setShowUserSearch(false);
   };
@@ -119,7 +120,7 @@ const Dashboard = () => {
               </p>
               <div className="flex items-center space-x-2">
                 <div
-                  className={`w-2 h-2 rounded-full ${isConnected} ? 'bg-green-400' : 'bg-red-400'}`}
+                  className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}
                 ></div>
                 <p className="text-xs text-gray-600">
                   {isConnected ? "Online" : "Connecting..."}
@@ -134,8 +135,8 @@ const Dashboard = () => {
           <ConversationList
             conversations={conversations}
             selectedConversation={selectedConversation}
-            onSelectedConversation={selectedConversation}
-            currentUserId={user.id}
+            onSelectedConversation={setSelectedConversation}
+            currentUserId={user._id}
           />
         </div>
       </div>
@@ -178,7 +179,7 @@ const Dashboard = () => {
         <UserSearch
           onSelectUser={handleNewConversation}
           onClose={() => setShowUserSearch(false)}
-          currentUserId={user.id}
+          currentUserId={user._id}
           token={token}
         />
       )}

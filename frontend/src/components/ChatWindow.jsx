@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Send, Circle} from 'lucide-react'
 
 const ChatWindow = ({
   conversation,
@@ -35,9 +36,9 @@ const ChatWindow = ({
       socket.on('user_typing', ({ user, isTyping }) => {
         setTypingUsers(prev => {
           if (isTyping) {
-            return prev.find(u => u.id === user.id) ? prev : [...prev, user];
+            return prev.find(u => u.id === user._id) ? prev : [...prev, user];
           } else {
-            return prev.filter(u => u.id !== user.id);
+            return prev.filter(u => u.id !== user._id);
           }
         });
       });
@@ -57,7 +58,7 @@ const ChatWindow = ({
         socket.off('messages_read');
       }
     };
-  }, [conversation.id, socket]);
+  }, [socket, conversation.id]);
 
   useEffect(() => {
     scrollToBottom();
@@ -68,7 +69,7 @@ const ChatWindow = ({
 
     try {
       const response = await fetch(
-        `${backendUrl}api/v1/conversations/${conversation.id}/messages?token=${token}`
+        `${backendUrl}/api/v1/conversations/${conversation.id}/messages?token=${token}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -97,7 +98,7 @@ const ChatWindow = ({
     socket.emit('send_message', {
       conversationId: conversation.id,
       content: newMessage.trim(),
-      recipientId: conversation.otherUser.id
+      recipientId: conversation.otherUser._id
     });
 
     setNewMessage('');
@@ -203,7 +204,7 @@ const ChatWindow = ({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-blue-50/30">
         {messages.map((message) => {
-          const isOwn = message.senderId === currentUser.id;
+          const isOwn = message.senderId === currentUser._id;
           
           return (
             <div key={message.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
