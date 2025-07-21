@@ -24,7 +24,6 @@ const ChatWindow = ({
     if (socket) {
       // Join conversation room
       socket.emit('join_conversation', conversation._id);
-      console.log("socket: ", conversation);
 
       // Listen for new messages
       socket.on('new_message', (message) => {
@@ -163,8 +162,7 @@ const ChatWindow = ({
   const getStatusText = (user) => {
     if (user.status === 'online') return 'Online';
     if (user.status === 'away') return 'Away';
-    
-    console.log("last seen user: ", user)
+  
     try {
       const lastSeen = new Date(user.lastSeen);
       const now = new Date();
@@ -199,7 +197,7 @@ const ChatWindow = ({
             </h2>
             <p className={`text-sm ${getStatusColor(conversation.otherUser.status)}`}>
               {getStatusText(conversation.otherUser)}
-              {console.log("---------------",conversation.otherUser)}
+              
             </p>
           </div>
         </div>

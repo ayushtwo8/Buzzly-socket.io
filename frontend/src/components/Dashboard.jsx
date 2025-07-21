@@ -52,6 +52,7 @@ const Dashboard = () => {
   }, [user, token]);
 
   const fetchConversations = async () => {
+    
     if (!token) return;
     try {
       const response = await axios.get(`${backendUrl}/api/v1/conversations`, {
@@ -59,17 +60,15 @@ const Dashboard = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("fetchConversation response.json: ", response.data);
       setConversations(response.data);
     } catch (error) {
-      console.log("Failed to fetch conversations: ", error);
+      console.error("Failed to fetch conversations: ", error);
     }
   };
 
   const handleNewConversation = (otherUserId) => {
     if (!socket || !user) return;
-    console.log("otheruserid: ", otherUserId);
-    const conversationId = [user._id, otherUserId].sort().join("-");
+    const conversationId = [user._id, otherUserId].sort().join("-");    
     socket.emit("start_conversation", { recipientId: otherUserId });
     setShowUserSearch(false);
   };
@@ -130,7 +129,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-
+        
         {/* conversation */}
         <div className="flex-1 overflow-y-auto">
           <ConversationList
@@ -141,6 +140,7 @@ const Dashboard = () => {
           />
         </div>
       </div>
+
 
       {/* main chat area */}
       <div className="flex-1 flex flex-col">

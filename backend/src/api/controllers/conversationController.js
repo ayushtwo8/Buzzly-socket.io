@@ -9,11 +9,11 @@ export const getUserConversations = async(req, res) => {
             participants: userId
         }).populate({
             path: 'lastMessage',
-            populate: ({path: 'senderId', select: 'username'})
+            populate: ({path: 'senderId', select: 'username status lastSeen'})
         })
         .populate({
             path: 'participants',
-            select: 'username status'
+            select: 'username status lastSeen'
         })
         .sort({ updatedAt: -1});
 

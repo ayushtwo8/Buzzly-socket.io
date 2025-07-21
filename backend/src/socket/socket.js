@@ -27,7 +27,8 @@ export const initializeSocket = (server) => {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
                 if(decoded){
                     const userId = decoded.userId;
-                    console.log("userid: ",userId)
+                    const user = await UserModel.findById(userId).select('username');
+                    console.log("userid: ",user)
                     socketUsers.set(socket.id, {_id: userId, username: user.username});
                     userSockets.set(userId, socket.id);
 

@@ -4,18 +4,20 @@ const MessageList = ({ messages, currentUser }) => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const formatTime = (timestamp) => {
-    return new Date(timestamp).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
+  console.log("nessagelist", messages);
+
   const isSystemMessage = (message) => {
-    return message.user.username === 'System';
+    return message.user.username === "System";
   };
 
   const isOwnMessage = (message) => {
@@ -38,8 +40,15 @@ const MessageList = ({ messages, currentUser }) => {
         const isOwn = isOwnMessage(message);
 
         return (
-          <div key={message.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-            <div className={`flex space-x-3 max-w-xs sm:max-w-md lg:max-w-lg ${isOwn ? 'flex-row-reverse space-x-reverse' : ''}`}>
+          <div
+            key={message.id}
+            className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
+          >
+            <div
+              className={`flex space-x-3 max-w-xs sm:max-w-md lg:max-w-lg ${
+                isOwn ? "flex-row-reverse space-x-reverse" : ""
+              }`}
+            >
               {/* Avatar */}
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 flex items-center justify-center text-white text-sm font-medium">
@@ -48,12 +57,18 @@ const MessageList = ({ messages, currentUser }) => {
               </div>
 
               {/* Message Content */}
-              <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
-                <div className={`rounded-2xl px-4 py-2 shadow-sm ${
-                  isOwn 
-                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white' 
-                    : 'bg-white/80 backdrop-blur-sm text-gray-800 border border-gray-200'
-                }`}>
+              <div
+                className={`flex flex-col ${
+                  isOwn ? "items-end" : "items-start"
+                }`}
+              >
+                <div
+                  className={`rounded-xl px-4 py-2 shadow-sm ${
+                    isOwn
+                      ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+                      : "bg-white/80 backdrop-blur-sm text-gray-800 border border-gray-200"
+                  }`}
+                >
                   {!isOwn && (
                     <div className="text-xs font-medium text-blue-600 mb-1">
                       {message.user.username}
@@ -63,7 +78,12 @@ const MessageList = ({ messages, currentUser }) => {
                     {message.text}
                   </div>
                 </div>
-                <div className={`text-xs text-gray-500 mt-1 ${isOwn ? 'text-right' : 'text-left'}`}>
+                <div
+                  className={`text-xs text-gray-500 mt-1 ${
+                    isOwn ? "text-right" : "text-left"
+                  }`}
+                >
+                  {console.log(message.timestamp)}
                   {formatTime(message.timestamp)}
                 </div>
               </div>

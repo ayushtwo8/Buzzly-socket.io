@@ -15,7 +15,6 @@ const ConversationList = ({
     }
   };
 
-  console.log("conversation: ", conversations);
 
   const formatLastMessage = (message) => {
     if (!message) return 'No messages yet';
@@ -72,20 +71,20 @@ const ConversationList = ({
             {/* Avatar */}
             <div className="relative">
               <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 flex items-center justify-center text-white font-medium">
-                {/* {conversation.otherUser.charAt(0).toUpperCase()} */}
+                {conversation.otherUser?.username?.charAt(0).toUpperCase() || '?'}
               </div>
-              {/* <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${getStatusColor(conversation.otherUser.status)}`} /> */}
+              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${getStatusColor(conversation.otherUser?.status)}`} />
             </div>
 
             {/* Content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-medium text-gray-900 truncate">
-                  {conversation.otherUser.username}
+                  {conversation.otherUser?.username}
                 </h4>
                 {conversation.lastMessage && (
                   <span className="text-xs text-gray-500">
-                    {formatTime(conversation.lastMessage.timestamp)}
+                    {formatTime(conversation.lastMessage?.timestamp)}
                   </span>
                 )}
               </div>
