@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext';
 import Dashboard from './components/Dashboard';
 import Auth from './components/Auth'
@@ -18,13 +18,13 @@ const App = () => {
   }
 
   return (
-    <BrowserRouter>
+    
       <Routes>
         <Route path='/' element={user ? <Navigate to="/chat" replace /> : <Auth />} />
         <Route path='/chat' element={user ?  <Dashboard /> : <Navigate to="/" replace /> }/>
         <Route path='*' element={<Navigate to="/" replace /> }/>
       </Routes>
-    </BrowserRouter>
+    
   )
 };
 
