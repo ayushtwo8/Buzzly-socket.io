@@ -10,7 +10,7 @@ export const comparePassword = (password, hash) => {
 }
 
 export const generateToken = (userId) => {
-    return jwt.sign({userId}, process.env.JWT_SECRET, { expiresIn: '1h'});
+    return jwt.sign({userId}, process.env.JWT_SECRET, { expiresIn: '1d'});
 }
 
 export const getConversationId = (userId1, userId2) => {

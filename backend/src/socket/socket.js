@@ -27,7 +27,8 @@ export const initializeSocket = (server) => {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
                 if(decoded){
                     const userId = decoded.userId;
-                    socketUsers.set(socket.id, userId);
+                    console.log("userid: ",userId)
+                    socketUsers.set(socket.id, {_id: userId, username: user.username});
                     userSockets.set(userId, socket.id);
 
                     await UserModel.findByIdAndUpdate(userId, {status: 'online'});
@@ -93,12 +94,14 @@ export const initializeSocket = (server) => {
         });
 
         // conversation creation
-        socket.on('start-conversation', async(data) => {
+        socket.on('start_conversation', async(data) => {
             try{
                 const senderId = socketUsers.get(socket.id);
                 if(!senderId ) return;
 
-                const recipientId = data;
+                console.log("data: ",data);
+
+                const recipientId = data.recipientId;
                 const conversationId = getConversationId(senderId, recipientId);
 
                 let conversation = await ConversationModel.findById(conversationId).populate('participants');
@@ -127,23 +130,24 @@ export const initializeSocket = (server) => {
 
         // typing indicators
         socket.on('typing_start', ({conversationId}) => {
-            const userId = socketUsers.get(socket.id);
-            if(userId){
-                socket.to(conversationId).emit('user_typing', {userId, conversationId, isTyping: true});
+
+            const userData = socketUsers.get(socket.id);
+            if(userData){
+        socket.to(conversationId).emit('user_typing', { user: userData, isTyping: true });
             }
         })
 
         socket.on('typing_stop', ({ conversationId })=>{
-            const userId = socketUsers.get(socket.id);
-            if(userId) {
-                socket.to(conversationId).emit('user_typing', {userId, conversationId, isTyping: false});
+            const userData = socketUsers.get(socket.id);
+            if(userData) {
+                socket.to(conversationId).emit('user_typing', {user:userData, isTyping: false});
             }
         })
 
         // read receipts
         socket.on('mark_messages_read', async({conversationId}) => {
             try{
-                const userId = socketUsers.get(socket,id);
+                const userId = socketUsers.get(socket.id);
                 if(!userId) return;
 
                 await MessageModel.updateMany(

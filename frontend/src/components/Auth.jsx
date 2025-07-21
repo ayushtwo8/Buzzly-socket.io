@@ -18,8 +18,6 @@ const Auth = () => {
 
   const { login, register, user } = useAuth();
 
-  console.log("auth component");
-
   useEffect(()=>{
     if(user){
       navigate('/chat');

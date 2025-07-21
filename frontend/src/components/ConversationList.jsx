@@ -1,7 +1,7 @@
 const ConversationList = ({
   conversations,
   selectedConversation,
-  onSelectConversation,
+  onSelectedConversation,
   currentUserId,
 }) => {
   const getStatusColor = (status) => {
@@ -14,6 +14,8 @@ const ConversationList = ({
         return 'bg-gray-400';
     }
   };
+
+  console.log("conversation: ", conversations);
 
   const formatLastMessage = (message) => {
     if (!message) return 'No messages yet';
@@ -43,6 +45,8 @@ const ConversationList = ({
     }
   };
 
+  // console.log("otherUser: ", otherUser)
+
   if (conversations.length === 0) {
     return (
       <div className="p-4 text-center text-gray-500">
@@ -56,10 +60,10 @@ const ConversationList = ({
     <div className="p-4 space-y-2">
       {conversations.map((conversation) => (
         <div
-          key={conversation.id}
-          onClick={() => onSelectConversation(conversation)}
+          key={conversation._id}
+          onClick={() => onSelectedConversation(conversation)}
           className={`p-3 rounded-xl cursor-pointer transition-all duration-200 ${
-            selectedConversation?.id === conversation.id
+            selectedConversation?._id === conversation._id
               ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200'
               : 'hover:bg-gray-50'
           }`}
@@ -68,9 +72,9 @@ const ConversationList = ({
             {/* Avatar */}
             <div className="relative">
               <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 flex items-center justify-center text-white font-medium">
-                {conversation.otherUser.username.charAt(0).toUpperCase()}
+                {/* {conversation.otherUser.charAt(0).toUpperCase()} */}
               </div>
-              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${getStatusColor(conversation.otherUser.status)}`} />
+              {/* <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${getStatusColor(conversation.otherUser.status)}`} /> */}
             </div>
 
             {/* Content */}

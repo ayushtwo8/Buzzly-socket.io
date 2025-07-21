@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import io from 'socket.io-client'
+import io from "socket.io-client";
 import axios from "axios";
 import { LogOut, Plus } from "lucide-react";
 import ConversationList from "./ConversationList";
@@ -15,7 +15,7 @@ const Dashboard = () => {
   const [showUserSearch, setShowUserSearch] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;  
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     if (user && token) {
@@ -54,13 +54,12 @@ const Dashboard = () => {
   const fetchConversations = async () => {
     if (!token) return;
     try {
-      const response = await axios.get(
-        `${backendUrl}/api/v1/conversations?token=${token}`,{
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      const response = await axios.get(`${backendUrl}/api/v1/conversations`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("fetchConversation response.json: ", response.data);
       setConversations(response.data);
     } catch (error) {
       console.log("Failed to fetch conversations: ", error);
@@ -69,7 +68,7 @@ const Dashboard = () => {
 
   const handleNewConversation = (otherUserId) => {
     if (!socket || !user) return;
-
+    console.log("otheruserid: ", otherUserId);
     const conversationId = [user._id, otherUserId].sort().join("-");
     socket.emit("start_conversation", { recipientId: otherUserId });
     setShowUserSearch(false);
@@ -115,12 +114,14 @@ const Dashboard = () => {
               {user.username.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="w-10 h-10 rounded-full bg-gradient-to-r froom-blue-400 to-indigo-500 flex items-center justify-center text-white font-medium">
+              <p className="font-semibold text-gray-800 truncate">
                 {user.username}
               </p>
               <div className="flex items-center space-x-2">
                 <div
-                  className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}
+                  className={`w-2 h-2 rounded-full ${
+                    isConnected ? "bg-green-400" : "bg-red-400"
+                  }`}
                 ></div>
                 <p className="text-xs text-gray-600">
                   {isConnected ? "Online" : "Connecting..."}

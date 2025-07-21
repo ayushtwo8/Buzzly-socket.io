@@ -7,7 +7,8 @@ const ChatWindow = ({
   socket,
   token,
   onConversationUpdate,
-}) => {
+}) => {  
+
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,11 +23,12 @@ const ChatWindow = ({
     
     if (socket) {
       // Join conversation room
-      socket.emit('join_conversation', conversation.id);
+      socket.emit('join_conversation', conversation._id);
+      console.log("socket: ", conversation);
 
       // Listen for new messages
       socket.on('new_message', (message) => {
-        if (message.conversationId === conversation.id) {
+        if (message.conversationId === conversation._id) {
           setMessages(prev => [...prev, message]);
           scrollToBottom();
         }
@@ -36,16 +38,16 @@ const ChatWindow = ({
       socket.on('user_typing', ({ user, isTyping }) => {
         setTypingUsers(prev => {
           if (isTyping) {
-            return prev.find(u => u.id === user._id) ? prev : [...prev, user];
+            return prev.find(u => u._id === user._id) ? prev : [...prev, user];
           } else {
-            return prev.filter(u => u.id !== user._id);
+            return prev.filter(u => u._id !== user._id);
           }
         });
       });
 
       // Listen for read receipts
       socket.on('messages_read', (conversationId) => {
-        if (conversationId === conversation.id) {
+        if (conversationId === conversation._id) {
           setMessages(prev => prev.map(msg => ({ ...msg, isRead: true })));
         }
       });
@@ -58,7 +60,7 @@ const ChatWindow = ({
         socket.off('messages_read');
       }
     };
-  }, [socket, conversation.id]);
+  }, [socket, conversation._id]);
 
   useEffect(() => {
     scrollToBottom();
@@ -69,7 +71,7 @@ const ChatWindow = ({
 
     try {
       const response = await fetch(
-        `${backendUrl}/api/v1/conversations/${conversation.id}/messages?token=${token}`
+        `${backendUrl}/api/v1/conversations/${conversation._id}/messages?token=${token}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -77,7 +79,7 @@ const ChatWindow = ({
         
         // Mark messages as read
         if (socket) {
-          socket.emit('mark_messages_read', conversation.id);
+          socket.emit('mark_messages_read', {conversationId: conversation._id});
         }
       }
     } catch (error) {
@@ -96,7 +98,7 @@ const ChatWindow = ({
     setLoading(true);
     
     socket.emit('send_message', {
-      conversationId: conversation.id,
+      conversationId: conversation._id,
       content: newMessage.trim(),
       recipientId: conversation.otherUser._id
     });
@@ -109,7 +111,7 @@ const ChatWindow = ({
 
   const handleTypingStart = () => {
     if (socket) {
-      socket.emit('typing_start', conversation.id);
+      socket.emit('typing_start', conversation._id);
       
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
@@ -123,7 +125,7 @@ const ChatWindow = ({
 
   const handleTypingStop = () => {
     if (socket) {
-      socket.emit('typing_stop', conversation.id);
+      socket.emit('typing_stop', conversation._id);
     }
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
@@ -162,6 +164,7 @@ const ChatWindow = ({
     if (user.status === 'online') return 'Online';
     if (user.status === 'away') return 'Away';
     
+    console.log("last seen user: ", user)
     try {
       const lastSeen = new Date(user.lastSeen);
       const now = new Date();
@@ -196,6 +199,7 @@ const ChatWindow = ({
             </h2>
             <p className={`text-sm ${getStatusColor(conversation.otherUser.status)}`}>
               {getStatusText(conversation.otherUser)}
+              {console.log("---------------",conversation.otherUser)}
             </p>
           </div>
         </div>
@@ -207,7 +211,7 @@ const ChatWindow = ({
           const isOwn = message.senderId === currentUser._id;
           
           return (
-            <div key={message.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+            <div key={message._id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
               <div className={`flex space-x-3 max-w-xs sm:max-w-md lg:max-w-lg ${isOwn ? 'flex-row-reverse space-x-reverse' : ''}`}>
                 {/* Avatar */}
                 <div className="flex-shrink-0">

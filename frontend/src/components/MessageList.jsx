@@ -19,7 +19,7 @@ const MessageList = ({ messages, currentUser }) => {
   };
 
   const isOwnMessage = (message) => {
-    return message.user._id === currentUser._id;
+    return message.user.id === currentUser.id;
   };
 
   return (

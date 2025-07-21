@@ -5,7 +5,7 @@ import axios from "axios";
 const UserSearch = ({
   onSelectUser,
   onClose,
-  // currentUserId, // Removed as it was unused
+  currentUserId, // Removed as it was unused
   token,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -97,7 +97,7 @@ const UserSearch = ({
             </div>
           ) : users.length > 0 ? (
             <div className="space-y-2">
-              {users.filter(user=>user && user._id)
+              {users.filter(user=> user._id !== currentUserId)
               .map((user) => (
                 <div
                   key={user._id}
