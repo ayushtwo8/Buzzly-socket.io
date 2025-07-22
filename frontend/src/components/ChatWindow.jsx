@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { Send, Circle} from 'lucide-react'
+// <-- 1. Import ArrowLeft for the back button
+import { Send, Circle, ArrowLeft } from 'lucide-react';
 
+// <-- 2. Add `onBack` to the list of props
 const ChatWindow = ({
   conversation,
   currentUser,
   socket,
   token,
   onConversationUpdate,
+  onBack,
 }) => {  
 
   const [messages, setMessages] = useState([]);
@@ -22,10 +25,8 @@ const ChatWindow = ({
     fetchMessages();
     
     if (socket) {
-      // Join conversation room
       socket.emit('join_conversation', conversation._id);
 
-      // Listen for new messages
       socket.on('new_message', (message) => {
         if (message.conversationId === conversation._id) {
           setMessages(prev => [...prev, message]);
@@ -33,7 +34,6 @@ const ChatWindow = ({
         }
       });
 
-      // Listen for typing indicators
       socket.on('user_typing', ({ user, isTyping }) => {
         setTypingUsers(prev => {
           if (isTyping) {
@@ -44,7 +44,6 @@ const ChatWindow = ({
         });
       });
 
-      // Listen for read receipts
       socket.on('messages_read', (conversationId) => {
         if (conversationId === conversation._id) {
           setMessages(prev => prev.map(msg => ({ ...msg, isRead: true })));
@@ -76,7 +75,6 @@ const ChatWindow = ({
         const data = await response.json();
         setMessages(data);
         
-        // Mark messages as read
         if (socket) {
           socket.emit('mark_messages_read', {conversationId: conversation._id});
         }
@@ -185,6 +183,15 @@ const ChatWindow = ({
       {/* Header */}
       <div className="bg-white/90 backdrop-blur-sm border-b border-gray-200 p-4">
         <div className="flex items-center space-x-3">
+          {/* <-- 3. Add the Back Button here. `md:hidden` makes it disappear on desktop */}
+          <button 
+            onClick={onBack} 
+            className="p-2 -ml-2 mr-1 rounded-full hover:bg-gray-100 md:hidden"
+            title="Back to conversations"
+          >
+            <ArrowLeft className="h-5 w-5 text-gray-600" />
+          </button>
+
           <div className="relative">
             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 flex items-center justify-center text-white font-medium">
               {conversation.otherUser.username.charAt(0).toUpperCase()}
@@ -197,7 +204,6 @@ const ChatWindow = ({
             </h2>
             <p className={`text-sm ${getStatusColor(conversation.otherUser.status)}`}>
               {getStatusText(conversation.otherUser)}
-              
             </p>
           </div>
         </div>
@@ -211,7 +217,6 @@ const ChatWindow = ({
           return (
             <div key={message._id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
               <div className={`flex space-x-3 max-w-xs sm:max-w-md lg:max-w-lg ${isOwn ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                {/* Avatar */}
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 flex items-center justify-center text-white text-sm font-medium">
                     {isOwn 
@@ -221,7 +226,6 @@ const ChatWindow = ({
                   </div>
                 </div>
 
-                {/* Message Content */}
                 <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
                   <div className={`rounded-2xl px-4 py-2 shadow-sm ${
                     isOwn 

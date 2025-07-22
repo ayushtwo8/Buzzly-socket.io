@@ -1,8 +1,10 @@
+// src/components/Dashboard.jsx
+
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import io from "socket.io-client";
 import axios from "axios";
-import { LogOut, Plus } from "lucide-react";
+import { LogOut, Plus, ArrowLeft } from "lucide-react"; // Note: ArrowLeft is not used here but in ChatWindow
 import ConversationList from "./ConversationList";
 import ChatWindow from "./ChatWindow";
 import UserSearch from "./UserSearch";
@@ -19,7 +21,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (user && token) {
-      // initialize socket connection
       const newSocket = io(backendUrl);
       setSocket(newSocket);
 
@@ -35,14 +36,13 @@ const Dashboard = () => {
       newSocket.on("conversation_created", (conversation) => {
         setConversations((prev) => [conversation, ...prev]);
         setSelectedConversation(conversation);
+        setShowUserSearch(false);
       });
 
       newSocket.on("new_message", () => {
-        // refresh conversations to update last message
         fetchConversations();
       });
 
-      // fetch initial conversations
       fetchConversations();
 
       return () => {
@@ -52,7 +52,6 @@ const Dashboard = () => {
   }, [user, token]);
 
   const fetchConversations = async () => {
-    
     if (!token) return;
     try {
       const response = await axios.get(`${backendUrl}/api/v1/conversations`, {
@@ -68,28 +67,26 @@ const Dashboard = () => {
 
   const handleNewConversation = (otherUserId) => {
     if (!socket || !user) return;
-    const conversationId = [user._id, otherUserId].sort().join("-");    
     socket.emit("start_conversation", { recipientId: otherUserId });
-    setShowUserSearch(false);
-  };
-
-  const getConversationId = (userId1, userId2) => {
-    return [userId1, userId2].sort().join("-");
   };
 
   if (!user) return null;
 
   return (
     <div className="h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex">
-      {/* sidebar */}
-      <div className="w-80 bg-white/80 backdrop-blur-sm border-r border-gray-200 flex flex-col">
-        {/* header */}
+      {/* Sidebar - Conditionally hidden on mobile */}
+      <div
+        className={`${
+          selectedConversation ? "hidden md:flex" : "flex"
+        } w-full md:w-80 bg-white/80 backdrop-blur-sm border-r border-gray-200 flex-col`}
+      >
+        {/* Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Buzzly
             </h1>
-            <div className="flex items-center space--x-2">
+            <div className="flex items-center space-x-2"> {/* Corrected space-x-2 */}
               <button
                 onClick={() => setShowUserSearch(true)}
                 className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -107,7 +104,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* current user */}
+          {/* Current user */}
           <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 flex items-center justify-center text-white font-medium">
               {user.username.charAt(0).toUpperCase()}
@@ -130,7 +127,7 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {/* conversation */}
+        {/* Conversation List */}
         <div className="flex-1 overflow-y-auto">
           <ConversationList
             conversations={conversations}
@@ -141,8 +138,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-
-      {/* main chat area */}
+      {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {selectedConversation ? (
           <ChatWindow
@@ -151,9 +147,13 @@ const Dashboard = () => {
             socket={socket}
             token={token}
             onConversationUpdate={fetchConversations}
+            // Pass a function to go back to the conversation list on mobile
+            onBack={() => setSelectedConversation(null)}
           />
         ) : (
-          <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50/50 to-indigo-100/50">
+          // This welcome screen is only visible on desktop now, because on mobile,
+          // the sidebar takes up the full screen when no conversation is selected.
+          <div className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-br from-blue-50/50 to-indigo-100/50">
             <div className="text-center">
               <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Plus className="h-10 w-10 text-blue-600" />
@@ -175,7 +175,7 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* user search modal */}
+      {/* User Search Modal */}
       {showUserSearch && (
         <UserSearch
           onSelectUser={handleNewConversation}
