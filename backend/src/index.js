@@ -25,9 +25,9 @@ const io = initializeSocket(server);
 
 
 // middlewares
-const allowedOrigins = process.env.FRONTEND_URLS.split(',');
+// const allowedOrigins = process.env.FRONTEND_URLS.split(',');
 app.use(cors({
-    origin: allowedOrigins,
+    origin: '*',
     credentials: true
 }));
 
